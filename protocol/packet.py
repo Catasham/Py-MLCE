@@ -1,23 +1,29 @@
 from abc import abstractmethod, ABC
 from enum import IntEnum
-from core.BinaryWriter import BinaryWriter
-from core.BinaryReader import BinaryReader
+from core.binaryWriter import BinaryWriter
+from core.binaryReader import BinaryReader
 
-# Truncate / extend string to specific length
-def extendString(string, length):
-    return string[:length].ljust(length)
+MAGIC = 0x4D434C4E # uint32
 
 class PacketId(IntEnum):
     keepAlive = 0
     login = 1
     preLogin = 2
 
+    playerAction = 14
+
 class Packet(ABC):
-    def __init__(self):
+    def __init__(self, packetName):
+        self.packetName = packetName
+        self.id = PacketId[self.packetName].value
         self.buffer = bytearray()
 
     @abstractmethod
-    def encode(self, writer:BinaryWriter): pass
+    def encode(self, writer:BinaryWriter): writer.writeI8(self.id)
 
     @abstractmethod
-    def decode(self, reader:BinaryReader): pass
+    def decode(self, reader:BinaryReader): pass # self.id = reader.readU8()
+
+    def __str__(self):
+        return f"""{self.packetName}Packet
+        packetId: {self.id}"""
