@@ -11,6 +11,7 @@ import struct
 class PacketHandler():
     def __init__(self):
         self._reader = BinaryReader(bytearray())
+        self._packetLength = 0
 
     # Append stream of data to buffer
     def addToBuffer(self, b:bytearray):
@@ -30,5 +31,6 @@ class PacketHandler():
                 raise ValueError(f"Unkown packet ID: {packetId}")
 
         # decode and return packet
+        self._packetLength = self._reader.bufferSize
         packet.decode(self._reader)
         return packet

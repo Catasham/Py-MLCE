@@ -9,9 +9,14 @@ from socket import socket
 from protocol.framePacketHandler import FramePacketHandler
 # Packets
 from protocol.packet import Packet
+from protocol.keepAlivePacket import KeepAlivePacket
 from protocol.preLoginPacket import PreLoginPacket
 from protocol.loginPacket import LoginPacket
-from protocol.keepAlivePacket import KeepAlivePacket
+from protocol.setSpawnPositionPacket import SetSpawnPositionPacket
+from protocol.playerAbilitiesPacket import PlayerAbilitiesPacket
+from protocol.chatPacket import ChatPacket
+from protocol.disconnectPacket import DisconnectPacket
+from protocol.setTimePacket import SetTimePacket
 from protocol.hostOptions import HostOptions
 
 NETCODE_VERSION = 560
@@ -63,6 +68,7 @@ class Client:
                     break
 
         self.connected = True
+        # Send world data
         return
 
     def _handleConnectionPacket(self, packet:Packet): # What action to take for each packet
@@ -79,6 +85,7 @@ class Client:
                 self._handlePreLogin(packet)
             case PacketId.login.value:
                 self._handleLogin(packet)
+                self._handleWorldSetup()
             case _:
                 pass
 
@@ -136,4 +143,12 @@ class Client:
             texturePackId=self._texturePackId,
             )
 
+        self._sendFrame(writer)
+
+    def _handleWorldSetup(self):
+        writer = BinaryWriter()
+        setupPackets = [SetSpawnPositionPacket(), PlayerAbilitiesPacket(), ChatPacket()]
+        for p in setupPackets:
+            p.encode(writer)
+            
         self._sendFrame(writer)

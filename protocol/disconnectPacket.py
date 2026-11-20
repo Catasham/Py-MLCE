@@ -36,9 +36,9 @@ class DisconnectReasonId(Enum):
 
 class DisconnectPacket(Packet):
     def __init__(self):
-        super().__init__()
+        super().__init__("disconnect")
 
-    def encode(self, writer:BinaryWriter, reason:int):
+    def encode(self, writer:BinaryWriter, reason:int=0):
         writer.writeI32(reason)
 
     def decode(self, reader:BinaryReader):
